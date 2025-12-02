@@ -478,6 +478,19 @@ impl SeedStreamFixedKeyAes128 {
 
         self.length_consumed = next_length_consumed;
     }
+
+    /// Fill a block given a block counter
+    pub fn hash_block_counter(&mut self, block_counter: &[u8]) -> [u8; 16] {
+        assert!(block_counter.len() <= 16);
+
+        let mut block = Block::from([0; 16]);
+        block.clone_from(&self.base_block);
+        for (b, i) in block.iter_mut().zip(block_counter.iter()) {
+            *b ^= i;
+        }
+        self.hash_block(&mut block);
+        block.into()
+    }
 }
 
 #[cfg(all(feature = "crypto-dependencies", feature = "experimental"))]
